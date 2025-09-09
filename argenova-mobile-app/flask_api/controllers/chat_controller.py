@@ -35,103 +35,113 @@ def chat():
         
         embedding = embedding_result["embedding"]
         
-        # 2. Vektör veritabanında arama yap
-        logger.info("🔍 Vektör arama başlıyor...")
-        search_results = qdrant_service.search_by_embedding(embedding, chat_request.question, limit=5)
+        # 2. Smart Query Detection - Hızlı analiz için
+        query_lower = chat_request.question.lower()
+        needs_all_data = any(keyword in query_lower for keyword in [
+            'en çok', 'en fazla', 'en yüksek', 'sırala', 'listele', 'tüm', 'hepsi', 
+            'karşılaştır', 'ortalama', 'toplam', 'kimler', 'hangi', 'kaç kişi'
+        ])
         
-        logger.info(f"📊 Arama sonucu sayısı: {len(search_results) if search_results else 0}")
-        
-        # 3. Context oluştur - benzerlik skoruna göre filtrele
         context = ''
         context_used = False
         relevant_sources = []
         
-        if search_results and len(search_results) > 0:
-            # Debug: Skorları logla
-            for i, result in enumerate(search_results):
-                logger.info(f"Sonuç {i+1}: Score={result.get('score', 0)}, Payload={result.get('payload', {}).get('isim', 'N/A')}")
-            
-            # Benzerlik skoruna göre filtrele (0.1 threshold - daha düşük)
-            relevant_results = [
-                result for result in search_results 
-                if result.get('score', 0) > 0.1
-            ][:3]  # En fazla 3 sonuç kullan
-            
-            if relevant_results:
-                context_parts = []
-                for result in relevant_results:
-                    payload = result.get('payload', {})
-                    # Çalışan verilerini text formatına çevir (chat.post.ts yaklaşımı)
-                    if payload.get('isim'):
-                        # Toplam mesai saatlerini hesapla
-                        toplam_mesai_list = payload.get('toplam_mesai', [])
-                        toplam_saat = sum(toplam_mesai_list) if toplam_mesai_list else 0
-                        
-                        # Günlük mesai detaylarını formatla
-                        gunluk_mesai_list = payload.get('gunluk_mesai', [])
-                        gunluk_detay = ""
-                        if gunluk_mesai_list and len(gunluk_mesai_list) > 0:
-                            son_hafta = gunluk_mesai_list[-1]  # Son haftanın verisi
-                            gunluk_detay = f"Pazartesi: {son_hafta.get('pazartesi', 0)}h, Salı: {son_hafta.get('sali', 0)}h, Çarşamba: {son_hafta.get('carsamba', 0)}h, Perşembe: {son_hafta.get('persembe', 0)}h, Cuma: {son_hafta.get('cuma', 0)}h"
-                        
-                        text = f"Çalışan: {payload['isim']}, Toplam Mesai: {toplam_saat} saat, Günlük Mesai: {gunluk_detay}"
-                        context_parts.append(text)
-                        relevant_sources.append({
-                            'text': f"{payload['isim']}: {toplam_saat} saat",
-                            'score': round(result.get('score', 0) * 100)
-                        })
+        if needs_all_data:
+            # TÜM VERİLERİ AL - DOĞRU ANALİZ İÇİN
+            logger.info("🚀 Tüm veriler alınıyor (doğru analiz için)...")
+            try:
+                all_employees = qdrant_service.list_employees()
+                logger.info(f"📊 Toplam çalışan sayısı: {len(all_employees)}")
                 
-                context = '\n\n'.join(context_parts)
+                # Mesai saatlerine göre sırala
+                employee_hours = []
+                for emp in all_employees:
+                    toplam_mesai_list = emp.get('toplam_mesai', [])
+                    toplam_saat = sum(toplam_mesai_list) if toplam_mesai_list else 0
+                    employee_hours.append({
+                        'isim': emp.get('isim', 'Bilinmeyen'),
+                        'toplam_saat': toplam_saat,
+                        'hafta_sayisi': len(toplam_mesai_list)
+                    })
+                
+                # Yüksekten düşüğe sırala
+                employee_hours.sort(key=lambda x: x['toplam_saat'], reverse=True)
+                
+                # Context oluştur - EN FAZLA 10 KİŞİ
+                context_parts = []
+                for i, emp in enumerate(employee_hours[:10]):
+                    context_parts.append(f"{i+1}. {emp['isim']}: {emp['toplam_saat']} saat")
+                    relevant_sources.append({
+                        'text': f"{emp['isim']}: {emp['toplam_saat']} saat",
+                        'score': 100 - (i * 5)  # Sıralama skorları
+                    })
+                
+                context = "MESAI SIRALAMASI (En çoktan en aza):\n" + '\n'.join(context_parts)
                 context_used = True
-                logger.info(f"Context oluşturuldu: {len(context_parts)} kaynak")
-                logger.info(f"Context içeriği: {context[:200]}...")
+                logger.info(f"✅ Tam veri analizi hazır: {len(employee_hours)} çalışan")
+                
+            except Exception as e:
+                logger.error(f"Tüm veri alma hatası: {e}")
+                # Fallback to vector search
+                context_used = False
         
-        # 4. System prompt hazırla
+        if not context_used:
+            # Vektör arama yap (eski metod)
+            logger.info("🔍 Vektör arama başlıyor...")
+            search_results = qdrant_service.search_by_embedding(embedding, chat_request.question, limit=8)
+            
+            if search_results and len(search_results) > 0:
+                relevant_results = [
+                    result for result in search_results 
+                    if result.get('score', 0) > 0.05  # Daha düşük threshold
+                ][:5]  # En fazla 5 sonuç
+                
+                if relevant_results:
+                    context_parts = []
+                    for result in relevant_results:
+                        payload = result.get('payload', {})
+                        if payload.get('isim'):
+                            toplam_mesai_list = payload.get('toplam_mesai', [])
+                            toplam_saat = sum(toplam_mesai_list) if toplam_mesai_list else 0
+                            
+                            text = f"Çalışan: {payload['isim']}, Toplam Mesai: {toplam_saat} saat"
+                            context_parts.append(text)
+                            relevant_sources.append({
+                                'text': f"{payload['isim']}: {toplam_saat} saat",
+                                'score': round(result.get('score', 0) * 100)
+                            })
+                    
+                    context = '\n'.join(context_parts)
+                    context_used = True
+                    logger.info(f"Context oluşturuldu: {len(context_parts)} kaynak")
+        
+        # 4. HIZLI System prompt hazırla
         if context_used:
-            system_prompt = f"""Sen gelişmiş bir mesai analiz asistanısın. Aşağıdaki güvenilir çalışan verilerini kullanarak kapsamlı analizler yap:
-
+            system_prompt = f"""MESAI VERİSİ:
 {context}
 
-YETENEKLERİN:
-1. **Çalışan Raporları**: Tüm çalışanlar hakkında detaylı raporlar oluştur
-2. **Mesai Analizi**: Günlük, haftalık, aylık mesai saatlerini analiz et
-3. **Sıralama ve Filtreleme**: Çalışanları mesai saatlerine göre sırala
-4. **İstatistiksel Analiz**: Ortalama, en yüksek, en düşük mesai saatlerini hesapla
-5. **Karşılaştırma**: Çalışanları birbirleriyle karşılaştır
-6. **Trend Analizi**: Mesai trendlerini ve değişimleri analiz et
-7. **Öneriler**: Mesai optimizasyonu için öneriler sun
+GÖREV: Sadece verilen mesai verilerini kullanarak KISA VE NET Türkçe yanıt ver.
 
-DETAYLI TALİMATLAR:
-- Cevabını mutlaka Türkçe ver
-- Sadece verilen bilgileri kullan, uydurma yapma
-- KISA VE NET yanıtlar ver (maksimum 3-4 cümle)
-- Sayısal verileri net göster (saat, yüzde)
-- Sıralama yaparken sadece isim ve mesai saati ver
-- Gereksiz açıklamalar yapma
-- Eğer bilgi yoksa "Bu bilgi mevcut verilerde bulunmuyor" de
-- Doğal ve anlaşılır dil kullan
+KURALLAR:
+- SADECE TÜRKÇE YAZ
+- MAKSIMUM 1-2 CÜMLE
+- VERİDEKİ SIRALAMA DOĞRU
+- İSİM + SAAT formatı kullan
 
-ÖRNEK SORULAR VE YANITLAR:
-- "Tüm çalışanları mesai saatlerine göre sırala" → "Ahmet: 45 saat, Mehmet: 42 saat, Ayşe: 40 saat"
-- "En fazla mesai yapan 5 çalışanı göster" → "1. Ahmet (45h), 2. Mehmet (42h), 3. Ayşe (40h)"
-- "Ortalama mesai saatini hesapla" → "Ortalama: 38.5 saat"
-- "Mesai saatleri 40'ın üzerinde olanları bul" → "Ahmet (45h), Mehmet (42h)" """
+HIZLI YANIT VER!"""
         else:
-            system_prompt = """Sen gelişmiş bir mesai analiz asistanısın. Mesai saatleri, çalışan verileri ve iş kuralları hakkında kapsamlı analizler yapabilirsin.
+            # Context yoksa basit bir prompt kullan
+            system_prompt = """SEN BİR TÜRK MESAI UZMANISIIN! SADECE TÜRKÇE YANIT VER!
 
-YETENEKLERİN:
-1. **Genel Mesai Analizi**: Standart mesai kuralları ve hesaplamaları
-2. **İstatistiksel Bilgiler**: Ortalama mesai, fazla mesai hesaplamaları
-3. **Yasal Bilgiler**: İş kanunu ve mesai yönetmelikleri
-4. **Öneriler**: Mesai optimizasyonu ve verimlilik artırma
-5. **Raporlama**: Farklı rapor formatları ve analiz yöntemleri
+Mesai analizi hakkında sorulara kısa ve net Türkçe cevaplar ver.
 
-DETAYLI TALİMATLAR:
-- Cevabını mutlaka Türkçe ver
-- KISA VE NET yanıtlar ver (maksimum 2-3 cümle)
-- Eğer kesin bilgi yoksa, bunu belirt
-- Doğal ve anlaşılır dil kullan
-- Gereksiz açıklamalar yapma"""
+KURALLAR:
+- SADECE TÜRKÇE YAZ
+- MAKSIMUM 2 CÜMLE
+- GENEL MESAI BİLGİLERİ VER
+- İNGİLİZCE YAZMA
+
+YANIT DİLİ: TÜRKÇE"""
         
         # 5. Chat mesajlarını hazırla
         messages = [
@@ -157,17 +167,45 @@ DETAYLI TALİMATLAR:
         
         logger.info(f"Chat mesajları hazırlandı: {len(messages)} mesaj")
         
-        # 6. AI yanıtı al
+        # 6. ULTRA HIZLI AI yanıtı al
         completion_result = ai_service.generate_completion_with_messages(
             messages,
-            temperature=0.2,  # Daha tutarlı yanıtlar için
-            max_tokens=500    # Kısa yanıtlar için
+            temperature=0.0,   # Deterministik yanıtlar (çok hızlı)
+            max_tokens=50      # Çok kısa yanıtlar (maksimum hız)
         )
         
         if not completion_result["success"]:
-            logger.error("AI yanıtı alınamadı")
+            logger.error(f"AI yanıtı alınamadı: {completion_result.get('error', 'Unknown error')}")
+            
+            # DIRECT ANALYSIS - AI olmadan hızlı yanıt
+            if context_used and relevant_sources:
+                # En çok mesai yapan sorusu için direct yanıt
+                if 'en çok' in chat_request.question.lower() or 'en fazla' in chat_request.question.lower():
+                    if relevant_sources:
+                        top_employee = relevant_sources[0]
+                        direct_answer = f"En çok mesai yapan çalışan {top_employee['text']}."
+                        
+                        return jsonify({
+                            "answer": direct_answer,
+                            "success": True,
+                            "context_used": True,
+                            "sources": relevant_sources[:3],
+                            "direct_analysis": True
+                        }), 200
+                
+                # Genel fallback
+                fallback_answer = f"Veriler bulundu: {', '.join([src['text'] for src in relevant_sources[:3]])}"
+                
+                return jsonify({
+                    "answer": fallback_answer,
+                    "success": True,
+                    "context_used": True,
+                    "sources": relevant_sources,
+                    "fallback": True
+                }), 200
+            
             return jsonify({
-                "answer": "Üzgünüm, şu anda yanıt veremiyorum. Lütfen daha sonra tekrar deneyin.",
+                "answer": "AI servisi geçici olarak yanıt veremiyor. Lütfen birkaç saniye sonra tekrar deneyin.",
                 "success": False,
                 "error": "AI_RESPONSE_FAILED"
             }), 500

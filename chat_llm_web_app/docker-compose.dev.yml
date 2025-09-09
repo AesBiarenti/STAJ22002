@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  nuxt-app:
+    build: .
+    container_name: nuxt-ai-app-dev
+    ports:
+      - "3005:3000"
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://mongodb:27017/ai_logs
+      - QDRANT_URL=http://qdrant:6333
+      - OLLAMA_URL=http://ollama:11434/api
+      - OLLAMA_CHAT_MODEL=llama3
+      - OLLAMA_EMBEDDING_MODEL=all-minilm
+      - AI_TEMPERATURE=0.7
+      - AI_MAX_TOKENS=512
+      - NITRO_PORT=3000
+      - NITRO_HOST=0.0.0.0
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - mongodb
+      - qdrant
+      - ollama
+    restart: unless-stopped
+    command: npm run dev
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: nuxt-ai-qdrant-dev
+    ports:
+      - "6337:6333"
+      - "6335:6334"
+    volumes:
+      - qdrant_storage_dev:/qdrant/storage
+    environment:
+      - QDRANT__SERVICE__HTTP_PORT=6333
+      - QDRANT__SERVICE__GRPC_PORT=6334
+    restart: unless-stopped
+
+  mongodb:
+    image: mongo:latest
+    container_name: nuxt-ai-mongodb-dev
+    ports:
+      - "27020:27017"
+    volumes:
+      - mongodb_data_dev:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=ai_logs
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: nuxt-ai-ollama-dev
+    ports:
+      - "11436:11434"
+    volumes:
+      - ollama_models_dev:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    restart: unless-stopped
+
+volumes:
+  qdrant_storage_dev:
+    driver: local
+  mongodb_data_dev:
+    driver: local
+  ollama_models_dev:
+    driver: local 

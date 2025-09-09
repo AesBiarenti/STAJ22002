@@ -1,0 +1,12 @@
+# Server başlatma
+docker-compose -f docker-compose.dev.yml up -d
+
+# Server kapatma  
+docker-compose -f docker-compose.dev.yml down
+
+# Yeniden başlatma
+docker-compose -f docker-compose.dev.yml restart
+
+# Build işlemleri
+npm run build
+docker build -t ai-mesai-app .

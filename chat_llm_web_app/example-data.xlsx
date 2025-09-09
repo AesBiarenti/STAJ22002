@@ -1,0 +1,6 @@
+Çalışan Adı,Tarih Aralığı,Mesai Saatleri,Toplam Saat
+Ahmet Yılmaz,2025-09-01/2025-09-07,"{'pazartesi': 8, 'sali': 8, 'carsamba': 8, 'persembe': 8, 'cuma': 8, 'cumartesi': 4, 'pazar': 0}",44
+Ayşe Demir,2025-09-01/2025-09-07,"{'pazartesi': 7, 'sali': 2, 'carsamba': 2, 'persembe': 2, 'cuma': 0, 'cumartesi': 0, 'pazar': 0}",13
+Mehmet Kaya,2025-09-08/2025-09-14,"{'pazartesi': 8, 'sali': 8, 'carsamba': 8, 'persembe': 8, 'cuma': 8, 'cumartesi': 0, 'pazar': 0}",40
+Fatma Özkan,2025-09-08/2025-09-14,"{'pazartesi': 6, 'sali': 6, 'carsamba': 6, 'persembe': 6, 'cuma': 6, 'cumartesi': 0, 'pazar': 0}",30
+Ali Çelik,2025-09-15/2025-09-21,"{'pazartesi': 8, 'sali': 8, 'carsamba': 8, 'persembe': 8, 'cuma': 8, 'cumartesi': 8, 'pazar': 0}",48 

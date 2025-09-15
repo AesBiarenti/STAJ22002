@@ -1,0 +1,1 @@
+rm -rf argenova-mobile-app/chat_llm_app/.git chat_llm_web_app/.git

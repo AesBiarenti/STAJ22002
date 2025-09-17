@@ -112,7 +112,3 @@ Uç noktalar proje içerisinde ilgili controller/route dosyalarında tanımlıd�
 -   Üretimde kimlik doğrulama ve yetkilendirme eklenmesi önerilir
 -   Büyük dosyalar ve raporlar `.gitignore` kapsamına alınmıştır
 -   Port çakışmalarında ilgili servisi durdurun veya compose dosyasında host portunu değiştirin
-
-## Lisans
-
-Bu depo kurum içi/staj projesi kapsamındadır. Kullanım koşulları kurum politikalarına tabidir.

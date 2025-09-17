@@ -35,3 +35,8 @@ logs/
 *.tmp
 *.bak
 *.backup 
+# Kullanım senaryoları dokümanları
+**/KULLANIM_SENARYOLARI.*
+**/KULLANIM SENARYOLARI.*
+**/Kullanım Senaryoları.*
+**/*kullanim*senaryo*.* 

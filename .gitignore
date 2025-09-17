@@ -1,0 +1,37 @@
+# Rapor ve dokümantasyon (repo dışı tutulacak)
+PROJE_ANALIZ_RAPORU.md
+**/PROJE_ANALIZ_RAPORU.md
+**/RAPOR*.md
+**/*rapor*.md
+**/docs_private/**
+
+# Office dosyaları (örnekler hariç)
+*.xlsx
+*.xls
+*.csv
+!chat_llm_web_app/example-data.csv
+!chat_llm_web_app/example-data.xlsx
+!chat_llm_web_app/mesai_tablosu_40_kisi.xlsx
+!argenova-mobile-app/mesai_tablosu_40_kisi.xlsx
+
+# IDE/OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Node/Flutter/Python genel
+node_modules/
+.dart_tool/
+build/
+.pub-cache/
+__pycache__/
+venv/
+.env
+
+# Loglar ve geçici dosyalar
+logs/
+*.log
+*.tmp
+*.bak
+*.backup 

@@ -81,12 +81,6 @@ Uç noktalar proje içerisinde ilgili controller/route dosyalarında tanımlıd�
 -   Durdur: `docker compose -f docker-compose.dev.yml stop`
 -   Kaldır: `docker compose -f docker-compose.dev.yml down`
 
-Varsayılan servisler ve portlar:
-
--   Nuxt Web: 3000
--   Qdrant: 6333
--   Ollama: 11434 (çakışma olursa dev compose’da host portunu değiştirin ve `OLLAMA_URL`’i güncelleyin)
--   MongoDB: 27017
 
 ### Sunucu Uçları
 
@@ -103,12 +97,3 @@ Uç noktalar proje içerisinde ilgili controller/route dosyalarında tanımlıd�
 
 -   Koleksiyon adı: `ai_vectors` (web). Flutter/Flask tarafındaki `mesai` koleksiyonundan bağımsızdır.
 -   Embedding boyutu 384, Cosine uzaklık kullanılır.
--   Gerekirse `searchVector` ile semantik arama eklenebilir (şu an scroll + özet yaklaşımı kullanılıyor).
-
----
-
-## Ortak Notlar
-
--   Üretimde kimlik doğrulama ve yetkilendirme eklenmesi önerilir
--   Büyük dosyalar ve raporlar `.gitignore` kapsamına alınmıştır
--   Port çakışmalarında ilgili servisi durdurun veya compose dosyasında host portunu değiştirin

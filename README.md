@@ -1,4 +1,4 @@
-# STAJ22002 Monorepo
+# STAJ22002
 
 Bu depo, iki ayrı uygulamayı bir arada barındırır:
 

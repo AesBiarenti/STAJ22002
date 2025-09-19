@@ -1,6 +1,6 @@
 # Argenova Flask API
 
-Bu backend, çalışan verileri ve AI chat için Qdrant vektör veritabanı ile entegre çalışan bir Flask API sunar.
+Bu backend, çalışan verileri ve AI chat için Qdrant vektör veritabanı ile entegre çalışan bir Flask API projesidir.
 
 ## Özellikler
 

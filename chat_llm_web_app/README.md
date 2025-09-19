@@ -90,5 +90,4 @@ Modern ve gelişmiş bir mesai analiz ve raporlama sistemi. **ai-app-argenova** 
 
 -   **Docker**: Containerization
 -   **Docker Compose**: Multi-service orchestration
--   **Nginx**: Reverse proxy ve SSL
 

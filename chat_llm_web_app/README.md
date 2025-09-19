@@ -17,7 +17,7 @@ Modern ve gelişmiş bir mesai analiz ve raporlama sistemi. **ai-app-argenova** 
 -   **Çoklu Model Desteği**: Llama 3, Llama 3.2, Phi-3 modelleri
 -   **Dinamik Model Seçimi**: Web arayüzünden anlık model değiştirme
 -   **Gelişmiş Embedding**: all-minilm ve mxbai-embed-large desteği
--   **Akıllı Yanıt Sistemi**: Bağlamsal ve detaylı yanıtlar
+-   **Akıllı Yanıt Sistemi**: Bağlamsal ve doğru yanıtlar
 -   **Sohbet Geçmişi**: Tam konuşma geçmişi korunması
 
 ### **Gelişmiş Veri Yönetimi**

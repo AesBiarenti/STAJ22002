@@ -64,7 +64,7 @@ Modern ve gelişmiş bir mesai analiz ve raporlama sistemi. **ai-app-argenova** 
 ### Modern Arayüz
 
 -   **Responsive Tasarım**: Tüm cihazlarda mükemmel görünüm
--   **Glassmorphism**: Modern UI trendleri
+-   **Glassmorphism**: Modern UI
 -   **Animasyonlar**: Smooth geçişler ve efektler
 -   **Dark Mode**: Göz yormayan tema
 -   **Sidebar Navigation**: Kolay navigasyon

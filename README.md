@@ -8,7 +8,7 @@ Bu depo, iki ayrı uygulamayı bir arada barındırır:
 Aşağıda her bir uygulamanın amacı, teknoloji yığını, kurulum/geliştirme talimatları ve önemli notlar özetlenmiştir.
 
 ## 1) argenova-mobile-app
-
+<img width="1132" height="648" alt="Frame 6" src="https://github.com/user-attachments/assets/e9d8c4e2-1e3f-4e73-93cf-5343980dc460" />
 ### Amaç
 
 -   Mobil cihazlardan sohbet arayüzü ile mesai verilerine ilişkin sorular sormak ve kısa, Türkçe yanıtlar almak
@@ -62,7 +62,7 @@ Uç noktalar proje içerisinde ilgili controller/route dosyalarında tanımlıd�
 ---
 
 ## 2) chat_llm_web_app
-
+<img width="1125" height="1126" alt="Group 6" src="https://github.com/user-attachments/assets/584b9a96-60c7-4aa6-94b9-5c0509727d37" />
 ### Amaç
 
 -   Web arayüzü üzerinden mesai verilerini yüklemek (Excel/CSV), Qdrant’a vektör olarak basmak

@@ -76,7 +76,7 @@ Uç noktalar proje içerisinde ilgili controller/route dosyalarında tanımlıd�
 
 ### Hızlı Başlangıç (Geliştirme - Docker Compose)
 
--   Dizine geçin: `chat_llm_web_app`
+-   Dizine geç: `chat_llm_web_app`
 -   Başlat: `docker compose -f docker-compose.dev.yml up -d`
 -   Durdur: `docker compose -f docker-compose.dev.yml stop`
 -   Kaldır: `docker compose -f docker-compose.dev.yml down`

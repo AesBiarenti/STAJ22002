@@ -39,7 +39,7 @@ Aşağıda her bir uygulamanın amacı, teknoloji yığını, kurulum/geliştirm
     - Çalıştırın: `python app.py`
     - Sağlık kontrolü: `GET http://<host>:5000/health`
 
-Uç noktalar proje içerisinde ilgili controller/route dosyalarında tanımlıdır.
+
 
 #### Flutter Mobil (Geliştirme)
 
